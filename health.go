@@ -5,6 +5,8 @@ import (
 	"net/http"
 )
 
+type Status string
+
 // Health Check Response Format for HTTP APIs uses JSON format described in RFC 8259 and has the media type "application/health+json".
 // Its content consists of a single mandatory root field ("status") and several optional fields:
 // See https://tools.ietf.org/id/draft-inadarei-api-health-check-02.html#rfc.section.3
@@ -28,7 +30,7 @@ type Health struct {
 	// Clients SHOULD assume that the HTTP response code returned by the health endpoint is applicable to the entire component (e.g. a larger API or a microservice).
 	// This is compatible with the behavior that current infrastructural tooling expects: load-balancers, service discoveries, and others, utilizing health-checks.
 	// See https://tools.ietf.org/id/draft-inadarei-api-health-check-02.html#rfc.section.3.1
-	Status string `json:"status" example:"pass"`
+	Status Status `json:"status" example:"pass"`
 
 	// version: (optional) public version of the service
 	// See https://tools.ietf.org/id/draft-inadarei-api-health-check-02.html#rfc.section.3.2
@@ -51,7 +53,7 @@ type Health struct {
 
 	// details (optional) is an object that provides more details about the status of the service as it pertains to the information about the downstream dependencies of the service in question.
 	// Please refer to the "The Details Object" section for more information.
-	Details Details `json:"details,omitempty"`
+	Details map[string][]Details `json:"details,omitempty"`
 
 	// links (optional) is an array of objects containing link relations and URIs [RFC3986] for external links that MAY contain more information about the health of the endpoint.
 	// Per web-linking standards [RFC8288] a link relationship SHUOLD either be a common/registered one or be indicated as a URI, to avoid name clashes.
@@ -96,7 +98,7 @@ type Details struct {
 	ObservedUnit string `json:"observedUnit,omitempty"`
 
 	// status (optional) has the exact same meaning as the top-level "output" element, but for the sub-component/downstream dependency represented by the details object.
-	Status string `json:"status" example:"pass"`
+	Status Status `json:"status" example:"pass"`
 
 	// time (optional) is the date-time, in ISO8601 format, at which the reading of the observedValue was recorded.
 	// This assumes that the value can be cached and the reading typically doesn't happen in real time, for performance and scalability purposes.
@@ -110,17 +112,20 @@ type Details struct {
 }
 
 const (
-	// Pass is the constant used for the health field to indicate that a service is functioning normally.
-	Pass = "pass"
+	// "pass": healthy
+	Pass Status = "pass"
 
-	// Fail is the constant used for the health field to indicate that a service has problems.
-	Fail = "fail"
+	// "fail": unhealthy
+	Fail Status = "fail"
+
+	// "warn": healthy, with some concerns
+	Warn Status = "warn"
 )
 
 // Implement this interface to provide Details sections in your Health response.
 type DetailsProvider interface {
 	// HealthDetails asks the DetailsProvider for its current Health status.
-	HealthDetails() Details
+	HealthDetails() map[string][]Details
 
 	// AuthorizeHealth asks whether the DetailsProvider authorizes Details to be included in a Health response to this request.
 	AuthorizeHealth(r *http.Request) bool
@@ -140,6 +145,13 @@ func (h *Service) Handler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Add(ContentType, ApplicationHealthJson)
 	w.WriteHeader(http.StatusOK)
 	h.template.Status = Pass
+	h.template.Details = make(map[string][]Details)
+	for _, detailsProvider := range h.detailsProviders {
+		detailsMap := detailsProvider.HealthDetails()
+		for detailsKey, details := range detailsMap {
+			h.template.Details[detailsKey] = append(h.template.Details[detailsKey], details...)
+		}
+	}
 	_ = json.NewEncoder(w).Encode(h.template)
 }
 
