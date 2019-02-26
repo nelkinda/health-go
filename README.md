@@ -33,6 +33,7 @@ If is possible to provide details.
 This library comes with the following details predefined:
 - system uptime
 - process uptime
+- mongodb health
 
 You can add any implementation of `DetailsProvider` to the varargs list of `health.New()`.
 
@@ -40,13 +41,29 @@ You can add any implementation of `DetailsProvider` to the varargs list of `heal
 package main
 
 import (
+	"context"
 	"github.com/nelkinda/health-go"
 	"github.com/nelkinda/health-go/details/uptime"
+	"github.com/nelkinda/health-go/details/mongodb"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 	"net/http"
+	"time"
 )
 
 func main() {
-	h := health.New(health.Health{Version: "1", ReleaseId: "1.0.0-SNAPSHOT"}, uptime.System(), uptime.Process())
+	url := "mongodb://127.0.0.1:27017"
+	client, _ := mongo.NewClient(options.Client().ApplyURI(url))
+	_ = client.Connect(context.Background())
+	h := health.New(
+		health.Health{
+			Version: "1",
+			ReleaseId: "1.0.0-SNAPSHOT",
+		},
+		uptime.System(),
+		uptime.Process(),
+		mongodb.Health(url, client, time.Duration(10)*time.Second, time.Duration(40)*time.Microsecond),
+	)
 	http.HandleFunc("/health", h.Handler)
 	http.ListenAndServe(":80", nil)
 }

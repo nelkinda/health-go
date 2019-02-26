@@ -14,12 +14,14 @@ import (
 type mongodb struct {
 	componentId string
 	client      *mongo.Client
+	timeout     time.Duration
+	threshold   time.Duration
 }
 
 func (m *mongodb) HealthDetails() map[string][]health.Details {
 	start := time.Now().UTC()
 	startTime := start.Format(time.RFC3339Nano)
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), m.timeout)
 	defer cancel()
 	err := m.client.Ping(ctx, readpref.Primary())
 	var details = health.Details{
@@ -31,10 +33,14 @@ func (m *mongodb) HealthDetails() map[string][]health.Details {
 		details.Status = health.Fail
 	} else {
 		end := time.Now().UTC()
-		responseTime := end.Sub(start).Nanoseconds()
-		details.ObservedValue = responseTime
+		responseTime := end.Sub(start)
+		details.ObservedValue = responseTime.Nanoseconds()
 		details.ObservedUnit = "ns"
-		details.Status = health.Pass
+		if responseTime > m.threshold {
+			details.Status = health.Warn
+		} else {
+			details.Status = health.Pass
+		}
 	}
 	return map[string][]health.Details{"mongodb:responseTime": {details}}
 }
@@ -45,6 +51,6 @@ func (*mongodb) AuthorizeHealth(r *http.Request) bool {
 
 // Process returns a DetailsProvider for health details about the process uptime.
 // Note that it does not really return the process uptime, but the time since calling this function.
-func Health(componentId string, client *mongo.Client) health.DetailsProvider {
-	return &mongodb{componentId: componentId, client: client}
+func Health(componentId string, client *mongo.Client, timeout time.Duration, threshold time.Duration) health.DetailsProvider {
+	return &mongodb{componentId: componentId, client: client, timeout: timeout, threshold: threshold}
 }
