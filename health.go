@@ -25,9 +25,9 @@
 //  }
 //
 // References
-// - Official draft: https://tools.ietf.org/id/draft-inadarei-api-health-check-02.html
-// - Latest published draft: https://inadarei.github.io/rfc-healthcheck/
-// - Git Repository of the RFC: https://github.com/inadarei/rfc-healthcheck
+// * Official draft: https://tools.ietf.org/id/draft-inadarei-api-health-check-02.html
+// * Latest published draft: https://inadarei.github.io/rfc-healthcheck/
+// * Git Repository of the RFC: https://github.com/inadarei/rfc-healthcheck
 package health
 
 import (
