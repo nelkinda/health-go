@@ -16,7 +16,6 @@
 // 	http.HandleFunc("/health", h.Handler)
 // 	http.ListenAndServe(":80", nil)
 // }
-
 package health
 
 import (
