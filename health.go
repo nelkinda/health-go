@@ -3,19 +3,31 @@
 // While doing so, you can add information about the service and optionally providers for Details.
 //
 // Example:
-// 	package main
+//  package main
 //
-// import (
-// 	"github.com/nelkinda/health-go"
-// 	"github.com/nelkinda/health-go/details/uptime"
-// 	"net/http"
-// )
+//  import (
+//  	"github.com/nelkinda/health-go"
+//  	"github.com/nelkinda/health-go/details/uptime"
+//  	"net/http"
+//  )
 //
-// func main() {
-// 	h := health.New(health.Health{Version: "1", ReleaseId: "1.0.0-SNAPSHOT"}, uptime.System(), uptime.Process())
-// 	http.HandleFunc("/health", h.Handler)
-// 	http.ListenAndServe(":80", nil)
-// }
+//  func main() {
+//  	h := health.New(
+//  		health.Health{
+//  			Version: "1",
+//  			ReleaseId: "1.0.0-SNAPSHOT",
+//  		},
+//  		uptime.System(),
+//  		uptime.Process(),
+//  	)
+//  	http.HandleFunc("/health", h.Handler)
+//  	http.ListenAndServe(":80", nil)
+//  }
+//
+// References
+// - Official draft: https://tools.ietf.org/id/draft-inadarei-api-health-check-02.html
+// - Latest published draft: https://inadarei.github.io/rfc-healthcheck/
+// - Git Repository of the RFC: https://github.com/inadarei/rfc-healthcheck
 package health
 
 import (
