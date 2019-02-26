@@ -17,9 +17,9 @@ func (u *process) HealthDetails() map[string][]health.Details {
 			{
 				ComponentType: "process",
 				ObservedValue: time.Now().UTC().Sub(u.start).Seconds(),
-				ObservedUnit: "s",
-				Status:health.Pass,
-				Time: now,
+				ObservedUnit:  "s",
+				Status:        health.Pass,
+				Time:          now,
 			},
 		},
 	}
@@ -34,4 +34,3 @@ func (*process) AuthorizeHealth(r *http.Request) bool {
 func Process() health.DetailsProvider {
 	return &process{start: time.Now().UTC()}
 }
-

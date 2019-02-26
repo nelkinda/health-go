@@ -19,9 +19,9 @@ func (u *system) HealthDetails() map[string][]health.Details {
 			{
 				ComponentType: "system",
 				ObservedValue: si.Uptime.Seconds(),
-				ObservedUnit: "s",
-				Status:health.Pass,
-				Time: now,
+				ObservedUnit:  "s",
+				Status:        health.Pass,
+				Time:          now,
 			},
 		},
 	}
@@ -35,4 +35,3 @@ func (*system) AuthorizeHealth(r *http.Request) bool {
 func System() health.DetailsProvider {
 	return &system{}
 }
-

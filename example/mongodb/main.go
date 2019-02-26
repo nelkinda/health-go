@@ -1,9 +1,13 @@
 package main
 
 import (
+	"context"
 	"flag"
 	"fmt"
 	"github.com/nelkinda/health-go"
+	"github.com/nelkinda/health-go/details/mongodb"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 	"io"
 	"net"
 	"net/http"
@@ -31,18 +35,23 @@ func waitForIntOrTerm() {
 	<-sigChan
 }
 
-type custom struct{}
-
-func (*custom) HealthDetails() map[string][]health.Details {
-	return map[string][]health.Details{"custom": {{ComponentId: "custom-component", Status: health.Pass}}}
-}
-
-func (*custom) AuthorizeHealth(r *http.Request) bool {
-	return true
-}
-
 func mustStart(port int) (net.Listener, string) {
-	h := health.New(health.Health{Version: "1", ReleaseId: "1.0.0-SNAPSHOT"}, &custom{})
+	url := "mongodb://127.0.0.1:27017"
+	client, err := mongo.NewClient(options.Client().ApplyURI(url))
+	if err != nil {
+		panic(err)
+	}
+	err = client.Connect(context.Background())
+	if err != nil {
+		panic(err)
+	}
+	h := health.New(
+		health.Health{
+			Version:   "1",
+			ReleaseId: "1.0.0-SNAPSHOT",
+		},
+		mongodb.Health(url, client),
+	)
 	mux := http.NewServeMux()
 	mux.HandleFunc("/health", h.Handler)
 	listener, err := net.Listen("tcp", fmt.Sprintf(":%v", port))
