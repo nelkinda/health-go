@@ -67,6 +67,28 @@ type Health struct {
 	Description string `json:"description,omitempty"`
 }
 
+// The Details Object
+// The "details" object MAY have a number of unique keys, one for each logical downstream dependency or sub-component.
+// Since each sub-component may be backed by several nodes with varying health statuses, these keys point to arrays of objects.
+// In case of a single-node sub-component (or if presence of nodes is not relevant), a single-element array should be used as the value, for consistency.
+//
+// The key identifying an element in the object should be a unique string within the details section.
+// It MAY have two parts: "{componentName}:{measurementName}", in which case the meaning of the parts SHOULD be as follows:
+// o componentName: (optional) human-readable name for the component.
+//   MUST not contain a colon, in the name, since colon is used as a separator.
+// o measurementName: (optional) name of the measurement type (a data point type) that th estatus is reported for.
+//   MUST not contain a colon, in the name, since colon is used as a separator.
+//   The observation's name can be one of:
+//   * A pre-defined value from this spec.
+//     Pre-defined values include:
+//     + utilization
+//     + responseTime
+//     + connections
+//     + uptime
+//   * A common and standard term from a well-known source such as schema.org, IANA or microformats.
+//   * A URI that indicates extra semantics and processing rules that MAY be provided by a resource at the other end of the URI.
+//     URIs do not have to be dereferenceable, however.
+//     They are just a namespace, and the meaning of a namespace CAN be provided by any convenient means (e.g. publishing an RFC, Swagger document or a nicely printed book).
 type Details struct {
 	// componentId: (optional) is a unique identifier of an instance of a specific sub-component/dependency of a service.
 	// Multiple objects with the same componentID MAY appear in the details, if they are from different nodes.
@@ -86,7 +108,7 @@ type Details struct {
 	ComponentType string `json:"componentType,omitempty"`
 
 	// observedValue: (optional) could be any valid JSON value, such as: string, number, object, array or literal.
-	ObservedValue string `json:"observedValue,omitempty"`
+	ObservedValue interface{} `json:"observedValue,omitempty"`
 
 	// observedUnit (optional) SHOULD be present if observedValue is present.
 	// Calrifies the unit of measurement in which observedUnit is reported, e.g. for a time-based value it is important to know whether the time is reported in seconds, minutes, hours or something else.
