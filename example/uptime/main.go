@@ -35,7 +35,7 @@ func waitForIntOrTerm() {
 func mustStart(port int) (net.Listener, string) {
 	h := health.New(
 		health.Health{
-			Version: "1",
+			Version:   "1",
 			ReleaseId: "1.0.0-SNAPSHOT",
 		},
 		uptime.System(),

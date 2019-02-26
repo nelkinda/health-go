@@ -1,3 +1,4 @@
+// Package uptime provides uptime-related health Details.
 package uptime
 
 import (
@@ -30,7 +31,8 @@ func (*system) AuthorizeHealth(r *http.Request) bool {
 	return true
 }
 
-func System() *system {
+// System returns a DetailsProvider for health details about the system uptime.
+func System() health.DetailsProvider {
 	return &system{}
 }
 

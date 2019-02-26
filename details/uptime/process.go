@@ -29,7 +29,9 @@ func (*process) AuthorizeHealth(r *http.Request) bool {
 	return true
 }
 
-func Process() *process {
+// Process returns a DetailsProvider for health details about the process uptime.
+// Note that it does not really return the process uptime, but the time since calling this function.
+func Process() health.DetailsProvider {
 	return &process{start: time.Now().UTC()}
 }
 
