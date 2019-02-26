@@ -18,34 +18,25 @@ type mongodb struct {
 
 func (m *mongodb) HealthDetails() map[string][]health.Details {
 	start := time.Now().UTC()
+	startTime := start.Format(time.RFC3339Nano)
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 	err := m.client.Ping(ctx, readpref.Primary())
+	var details = health.Details{
+		ComponentId: m.componentId,
+		Time:        startTime,
+	}
 	if err != nil {
-		return map[string][]health.Details{
-			"mongodb:responseTime": {
-				{
-					ComponentId: m.componentId,
-					Output:      err.Error(),
-					Status:      health.Fail,
-					Time:        start.Format(time.RFC3339Nano),
-				},
-			},
-		}
+		details.Output = err.Error()
+		details.Status = health.Fail
+	} else {
+		end := time.Now().UTC()
+		responseTime := end.Sub(start).Nanoseconds()
+		details.ObservedValue = responseTime
+		details.ObservedUnit = "ns"
+		details.Status = health.Pass
 	}
-	end := time.Now().UTC()
-	responseTime := end.Sub(start).Nanoseconds()
-	return map[string][]health.Details{
-		"mongodb:responseTime": {
-			{
-				ComponentId:   m.componentId,
-				ObservedValue: responseTime,
-				ObservedUnit:  "ns",
-				Status:        health.Pass,
-				Time:          start.Format(time.RFC3339Nano),
-			},
-		},
-	}
+	return map[string][]health.Details{"mongodb:responseTime": {details}}
 }
 
 func (*mongodb) AuthorizeHealth(r *http.Request) bool {
