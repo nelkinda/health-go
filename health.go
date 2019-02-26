@@ -1,3 +1,22 @@
+// Package health provides an implementation of the upcoming RFC Health Check Response Format for HTTP APIs.
+// To use it, ask health to create a new http.Handler and add it to your server.
+// While doing so, you can add information about the service and optionally providers for Details.
+//
+// Example:
+// 	package main
+//
+// import (
+// 	"github.com/nelkinda/health-go"
+// 	"github.com/nelkinda/health-go/details/uptime"
+// 	"net/http"
+// )
+//
+// func main() {
+// 	h := health.New(health.Health{Version: "1", ReleaseId: "1.0.0-SNAPSHOT"}, uptime.System(), uptime.Process())
+// 	http.HandleFunc("/health", h.Handler)
+// 	http.ListenAndServe(":80", nil)
+// }
+
 package health
 
 import (
