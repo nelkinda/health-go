@@ -35,6 +35,7 @@ This library comes with the following details predefined:
 - process uptime
 - mongodb health
 - SendGrid health
+- sysinfo information (CPU Utilization, RAM, uptime, number of processes)
 
 You can add any implementation of `DetailsProvider` to the varargs list of `health.New()`.
 
@@ -45,6 +46,7 @@ import (
 	"context"
 	"github.com/nelkinda/health-go"
 	"github.com/nelkinda/health-go/details/uptime"
+	"github.com/nelkinda/health-go/details/sysinfo"
 	"github.com/nelkinda/health-go/details/mongodb"
 	"github.com/nelkinda/health-go/details/sendgrid"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -66,6 +68,7 @@ func main() {
 		uptime.Process(),
 		mongodb.Health(url, client, time.Duration(10)*time.Second, time.Duration(40)*time.Microsecond),
 		sendgrid.Health(),
+		sysinfo.Health(),
 	)
 	http.HandleFunc("/health", h.Handler)
 	http.ListenAndServe(":80", nil)
