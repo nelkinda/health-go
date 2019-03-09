@@ -32,6 +32,7 @@ package health
 
 import (
 	"encoding/json"
+	"github.com/nelkinda/http-go/mimetype"
 	"net/http"
 )
 
@@ -185,7 +186,6 @@ type DetailsProvider interface {
 
 const (
 	ContentType           = "Content-Type"
-	ApplicationHealthJson = "application/health+json"
 )
 
 // @Summary Service health
@@ -194,14 +194,14 @@ const (
 // @Success 200 {object} health.Health
 // @Router /health [GET]
 func (h *Service) Handler(w http.ResponseWriter, r *http.Request) {
-	w.Header().Add(ContentType, ApplicationHealthJson)
-	if (r.Method == http.MethodOptions) {
+	w.Header().Add(ContentType, mimetype.ApplicationHealthJson)
+	if r.Method == http.MethodOptions {
 		w.Header().Set("Allow", "OPTIONS, GET, HEAD")
 		w.Header().Set("Cache-Control", "max-age=604800")
 		w.WriteHeader(http.StatusOK)
 		return
 	}
-	if (r.Method != http.MethodGet && r.Method != http.MethodHead) {
+	if r.Method != http.MethodGet && r.Method != http.MethodHead {
 		w.WriteHeader(http.StatusMethodNotAllowed)
 		return
 	}
