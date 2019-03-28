@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/nelkinda/health-go"
 	"net/http"
+	"os"
 	"syscall"
 	"time"
 )
@@ -84,6 +85,15 @@ func (u *sysinfo) HealthDetails() map[string][]health.Details {
 	return map[string][]health.Details{
 		"uptime": {
 			uptime(),
+		},
+		"hostname": {
+			{
+				ComponentId:   "hostname",
+				ComponentType: "system",
+				ObservedValue: os.Hostname(),
+				Status:        health.Pass,
+				Time:          now,
+			},
 		},
 		"cpu:utilization": {
 			cpuutil("1 minute", si.Loads[0]),
