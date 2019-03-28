@@ -21,6 +21,7 @@ func (u *sysinfo) HealthDetails() map[string][]health.Details {
 	var processes func() health.Details
 	var cpuutil func(componentId string, load uint64) health.Details
 	var memutil func(componentId string, load uint64) health.Details
+	var hostname func() health.Details
 	if err != nil {
 		cpuutil = func(componentId string, load uint64) health.Details {
 			return health.Details{
@@ -82,18 +83,35 @@ func (u *sysinfo) HealthDetails() map[string][]health.Details {
 			}
 		}
 	}
+
+	if hn, err := os.Hostname(); err == nil {
+		hostname = func() health.Details {
+			return health.Details{
+				ComponentId:   "hostname",
+				ComponentType: "system",
+				ObservedValue: hn,
+				Status:        health.Pass,
+				Time:          now,
+			}
+		}
+	} else {
+		hostname = func() health.Details {
+			return health.Details{
+				ComponentId:   "hostname",
+				ComponentType: "system",
+				Status:        health.Fail,
+				Time:          now,
+				Output:        err.Error(),
+			}
+		}
+	}
+
 	return map[string][]health.Details{
 		"uptime": {
 			uptime(),
 		},
 		"hostname": {
-			{
-				ComponentId:   "hostname",
-				ComponentType: "system",
-				ObservedValue: os.Hostname(),
-				Status:        health.Pass,
-				Time:          now,
-			},
+			hostname(),
 		},
 		"cpu:utilization": {
 			cpuutil("1 minute", si.Loads[0]),
