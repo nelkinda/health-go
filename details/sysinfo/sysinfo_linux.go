@@ -29,7 +29,7 @@ func (u *sysinfo) HealthDetails() map[string][]health.Details {
 		cpuutil = func(componentId string, load uint64) health.Details {
 			return health.Details{
 				ComponentType: "system",
-				ComponentId:   componentId,
+				ComponentID:   componentId,
 				Status:        health.Fail,
 				Output:        err.Error(),
 				Time:          now,
@@ -50,7 +50,7 @@ func (u *sysinfo) HealthDetails() map[string][]health.Details {
 		cpuutil = func(componentId string, load uint64) health.Details {
 			return health.Details{
 				ComponentType: "system",
-				ComponentId:   componentId,
+				ComponentID:   componentId,
 				ObservedValue: load / 65536.0,
 				ObservedUnit:  "%",
 				Status:        health.Pass,
@@ -60,7 +60,7 @@ func (u *sysinfo) HealthDetails() map[string][]health.Details {
 		memutil = func(componentId string, memory uint64) health.Details {
 			return health.Details{
 				ComponentType: "system",
-				ComponentId:   componentId,
+				ComponentID:   componentId,
 				ObservedValue: memory,
 				ObservedUnit:  memunit,
 				Status:        health.Pass,
@@ -78,7 +78,7 @@ func (u *sysinfo) HealthDetails() map[string][]health.Details {
 		}
 		processes = func() health.Details {
 			return health.Details{
-				ComponentId:   "Processes",
+				ComponentID:   "Processes",
 				ComponentType: "system",
 				ObservedValue: si.Procs,
 				Status:        health.Pass,
@@ -90,7 +90,7 @@ func (u *sysinfo) HealthDetails() map[string][]health.Details {
 	if hn, err := os.Hostname(); err == nil {
 		hostname = func() health.Details {
 			return health.Details{
-				ComponentId:   "hostname",
+				ComponentID:   "hostname",
 				ComponentType: "system",
 				ObservedValue: hn,
 				Status:        health.Pass,
@@ -100,7 +100,7 @@ func (u *sysinfo) HealthDetails() map[string][]health.Details {
 	} else {
 		hostname = func() health.Details {
 			return health.Details{
-				ComponentId:   "hostname",
+				ComponentID:   "hostname",
 				ComponentType: "system",
 				Status:        health.Fail,
 				Time:          now,
@@ -139,7 +139,9 @@ func (*sysinfo) AuthorizeHealth(r *http.Request) bool {
 	return true
 }
 
-// SysInfo returns a DetailsProvider that provides sysinfo statistics.
+// Health returns a DetailsProvider that provides sysinfo statistics.
+// On Linux, this will be details from syscall.Sysinfo_t.
+// On other platforms, this provider provides no information.
 func Health() health.DetailsProvider {
 	return &sysinfo{}
 }

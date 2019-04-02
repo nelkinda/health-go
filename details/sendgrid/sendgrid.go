@@ -9,11 +9,11 @@ import (
 
 type sendGrid struct{}
 
-const sendGridUrl = "http://status.sendgrid.com/"
+const sendGridURL = "http://status.sendgrid.com/"
 
 func getSendGridStatus() health.Details {
 	client := &http.Client{Timeout: time.Second * 2}
-	req, err := http.NewRequest(http.MethodGet, sendGridUrl, nil)
+	req, err := http.NewRequest(http.MethodGet, sendGridURL, nil)
 	if err != nil {
 		panic(err)
 	}
@@ -60,6 +60,8 @@ func (*sendGrid) AuthorizeHealth(r *http.Request) bool {
 	return true
 }
 
+// Health returns a DetailsProvider that provides SendGrid health.
+// SendGrid health is determined by a simple HTTP ping to SendGrid.
 func Health() health.DetailsProvider {
 	return &sendGrid{}
 }

@@ -34,7 +34,7 @@ func waitForIntOrTerm() {
 type custom struct{}
 
 func (*custom) HealthDetails() map[string][]health.Details {
-	return map[string][]health.Details{"custom": {{ComponentId: "custom-component", Status: health.Pass}}}
+	return map[string][]health.Details{"custom": {{ComponentID: "custom-component", Status: health.Pass}}}
 }
 
 func (*custom) AuthorizeHealth(r *http.Request) bool {
@@ -42,7 +42,7 @@ func (*custom) AuthorizeHealth(r *http.Request) bool {
 }
 
 func mustStart(port int) (net.Listener, string) {
-	h := health.New(health.Health{Version: "1", ReleaseId: "1.0.0-SNAPSHOT"}, &custom{})
+	h := health.New(health.Health{Version: "1", ReleaseID: "1.0.0-SNAPSHOT"}, &custom{})
 	mux := http.NewServeMux()
 	mux.HandleFunc("/health", h.Handler)
 	listener, err := net.Listen("tcp", fmt.Sprintf(":%v", port))

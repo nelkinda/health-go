@@ -49,7 +49,7 @@ func mustStart(port int) (net.Listener, string) {
 	h := health.New(
 		health.Health{
 			Version:   "1",
-			ReleaseId: "1.0.0-SNAPSHOT",
+			ReleaseID: "1.0.0-SNAPSHOT",
 		},
 		mongodb.Health(url, client, time.Duration(1)*time.Second, time.Duration(200)*time.Millisecond),
 	)

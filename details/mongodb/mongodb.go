@@ -1,4 +1,4 @@
-// Provides health details for a MongoDB connection.
+// Package mongodb provides health details for a MongoDB connection.
 // This works on MongoDB as well as Microsoft Azure Cosmos DB.
 package mongodb
 
@@ -12,7 +12,7 @@ import (
 )
 
 type mongodb struct {
-	componentId string
+	componentID string
 	client      *mongo.Client
 	timeout     time.Duration
 	threshold   time.Duration
@@ -25,7 +25,7 @@ func (m *mongodb) HealthDetails() map[string][]health.Details {
 	defer cancel()
 	err := m.client.Ping(ctx, readpref.Primary())
 	var details = health.Details{
-		ComponentId: m.componentId,
+		ComponentID: m.componentID,
 		Time:        startTime,
 	}
 	if err != nil {
@@ -49,8 +49,8 @@ func (*mongodb) AuthorizeHealth(r *http.Request) bool {
 	return true
 }
 
-// Process returns a DetailsProvider for health details about the process uptime.
+// Health returns a DetailsProvider for health details about the process uptime.
 // Note that it does not really return the process uptime, but the time since calling this function.
-func Health(componentId string, client *mongo.Client, timeout time.Duration, threshold time.Duration) health.DetailsProvider {
-	return &mongodb{componentId: componentId, client: client, timeout: timeout, threshold: threshold}
+func Health(componentID string, client *mongo.Client, timeout time.Duration, threshold time.Duration) health.DetailsProvider {
+	return &mongodb{componentID: componentID, client: client, timeout: timeout, threshold: threshold}
 }

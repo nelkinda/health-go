@@ -32,7 +32,7 @@ func waitForIntOrTerm() {
 }
 
 func mustStart(port int) (net.Listener, string) {
-	h := health.New(health.Health{Version: "1", ReleaseId: "1.0.0-SNAPSHOT"})
+	h := health.New(health.Health{Version: "1", ReleaseID: "1.0.0-SNAPSHOT"})
 	mux := http.NewServeMux()
 	mux.HandleFunc("/health", h.Handler)
 	listener, err := net.Listen("tcp", fmt.Sprintf(":%v", port))

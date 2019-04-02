@@ -32,10 +32,13 @@ package health
 
 import (
 	"encoding/json"
+	"github.com/nelkinda/http-go/header"
 	"github.com/nelkinda/http-go/mimetype"
 	"net/http"
 )
 
+// Status represents a health status.
+// Possible values are pass, warn, and fail.
 type Status string
 
 // Health Check Response Format for HTTP APIs uses JSON format described in RFC 8259 and has the media type "application/health+json".
@@ -72,7 +75,7 @@ type Health struct {
 	// However implementation of an API may change much more frequently, which leads to the importance of having separate "release number" or "releaseID" that is different from the public version of the API.
 	// See https://tools.ietf.org/id/draft-inadarei-api-health-check-02.html#rfc.section.3.3
 	// [Note: It is probably recommended to use Semantic Versioning for this field, see https://semver.org/]
-	ReleaseId string `json:"releaseId,omitempty" example:"1.14.2-SNAPSHOT"`
+	ReleaseID string `json:"releaseId,omitempty" example:"1.14.2-SNAPSHOT"`
 
 	// notes: (optional) array of notes relevant to current state of health
 	// See https://tools.ietf.org/id/draft-inadarei-api-health-check-02.html#rfc.section.3.4
@@ -92,7 +95,7 @@ type Health struct {
 	Links map[string]string `json:"links,omitempty"`
 
 	// serviceId (optional) is a unique identifier of the service, in the application scope.
-	ServiceId string `json:"serviceId,omitempty"`
+	ServiceID string `json:"serviceId,omitempty"`
 
 	// description (optional) is a human-friendly description of the service.
 	Description string `json:"description,omitempty"`
@@ -124,7 +127,7 @@ type Details struct {
 	// componentId: (optional) is a unique identifier of an instance of a specific sub-component/dependency of a service.
 	// Multiple objects with the same componentID MAY appear in the details, if they are from different nodes.
 	// See https://tools.ietf.org/id/draft-inadarei-api-health-check-02.html#rfc.section.4.1
-	ComponentId string `json:"componentId,omitempty"`
+	ComponentID string `json:"componentId,omitempty"`
 
 	// componentType: (optional) SHOULD be present if componentName is present.
 	// It's a type of the component and could be one of:
@@ -165,17 +168,17 @@ type Details struct {
 }
 
 const (
-	// "pass": healthy
+	// Pass represents a healthy service "pass"
 	Pass Status = "pass"
 
-	// "fail": unhealthy
+	// Fail represents an unhealthy service "fail"
 	Fail Status = "fail"
 
-	// "warn": healthy, with some concerns
+	// Warn represents a healthy service with some minor problem "warn"
 	Warn Status = "warn"
 )
 
-// Implement this interface to provide Details sections in your Health response.
+// DetailsProvider provides health details, potentially with prior authorization.
 type DetailsProvider interface {
 	// HealthDetails asks the DetailsProvider for its current Health status.
 	HealthDetails() map[string][]Details
@@ -184,17 +187,14 @@ type DetailsProvider interface {
 	AuthorizeHealth(r *http.Request) bool
 }
 
-const (
-	ContentType           = "Content-Type"
-)
-
+// Handler implements the health endpoint.
 // @Summary Service health
 // @Description Returns the service health according to the upcoming IETF RFC Health Check Response Format for HTTP APIs https://tools.ietf.org/id/draft-inadarei-api-health-check-02.html
 // @Produce application/json
 // @Success 200 {object} health.Health
 // @Router /health [GET]
 func (h *Service) Handler(w http.ResponseWriter, r *http.Request) {
-	w.Header().Add(ContentType, mimetype.ApplicationHealthJson)
+	w.Header().Add(header.ContentType, mimetype.ApplicationHealthJson)
 	if r.Method == http.MethodOptions {
 		w.Header().Set("Allow", "OPTIONS, GET, HEAD")
 		w.Header().Set("Cache-Control", "max-age=604800")
@@ -217,11 +217,15 @@ func (h *Service) Handler(w http.ResponseWriter, r *http.Request) {
 	_ = json.NewEncoder(w).Encode(h.template)
 }
 
+// Service describes an instance of a health service.
 type Service struct {
+	// The providers for details of this health service.
 	detailsProviders []DetailsProvider
+	// The template for the outer health response.
 	template         Health
 }
 
+// New creates a new health service.
 func New(template Health, detailsProviders ...DetailsProvider) *Service {
 	return &Service{detailsProviders: detailsProviders, template: template}
 }

@@ -15,7 +15,9 @@ func (*sysinfo) AuthorizeHealth(r *http.Request) bool {
 	return true
 }
 
-// SysInfo returns a DetailsProvider that provides sysinfo statistics.
+// Health returns a DetailsProvider that provides sysinfo statistics.
+// On Linux, this will be details from syscall.Sysinfo_t.
+// On other platforms, this provider provides no information.
 func Health() health.DetailsProvider {
 	return &sysinfo{}
 }

@@ -36,9 +36,9 @@ func mustStart(port int) (net.Listener, string) {
 	h := health.New(
 		health.Health{
 			Version:   "1",
-			ReleaseId: "1.0.0-SNAPSHOT",
+			ReleaseID: "1.0.0-SNAPSHOT",
 		},
-		sendgrid.SendGrid(),
+		sendgrid.Health(),
 	)
 	mux := http.NewServeMux()
 	mux.HandleFunc("/health", h.Handler)
