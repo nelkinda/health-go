@@ -18,7 +18,7 @@ import (
 
 func main() {
 	// 1. Create the health Handler.
-	h := health.New(health.Health{Version: "1", ReleaseId: "1.0.0-SNAPSHOT"}) 
+	h := health.New(health.Health{Version: "1", ReleaseID: "1.0.0-SNAPSHOT"}) 
 
 	// 2. Add the handler to your mux/server.
 	http.HandleFunc("/health", h.Handler)
@@ -28,16 +28,16 @@ func main() {
 }
 ```
 
-## Providing Details
-If is possible to provide details.
-This library comes with the following details predefined:
+## Providing Checks
+If is possible to provide checks.
+This library comes with the following checks predefined:
 - system uptime
 - process uptime
 - mongodb health
 - SendGrid health
 - sysinfo information (CPU Utilization, RAM, uptime, number of processes)
 
-You can add any implementation of `DetailsProvider` to the varargs list of `health.New()`.
+You can add any implementation of `ChecksProvider` to the varargs list of `health.New()`.
 
 ```go
 package main
@@ -45,10 +45,10 @@ package main
 import (
 	"context"
 	"github.com/nelkinda/health-go"
-	"github.com/nelkinda/health-go/details/uptime"
-	"github.com/nelkinda/health-go/details/sysinfo"
-	"github.com/nelkinda/health-go/details/mongodb"
-	"github.com/nelkinda/health-go/details/sendgrid"
+	"github.com/nelkinda/health-go/checks/uptime"
+	"github.com/nelkinda/health-go/checks/sysinfo"
+	"github.com/nelkinda/health-go/checks/mongodb"
+	"github.com/nelkinda/health-go/checks/sendgrid"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"net/http"
@@ -62,7 +62,7 @@ func main() {
 	h := health.New(
 		health.Health{
 			Version: "1",
-			ReleaseId: "1.0.0-SNAPSHOT",
+			ReleaseID: "1.0.0-SNAPSHOT",
 		},
 		uptime.System(),
 		uptime.Process(),
@@ -76,6 +76,6 @@ func main() {
 ```
 
 ## References
-* Official draft: https://tools.ietf.org/id/draft-inadarei-api-health-check-02.html
+* Official draft: https://tools.ietf.org/id/draft-inadarei-api-health-check-03.html
 * Latest published draft: https://inadarei.github.io/rfc-healthcheck/
 * Git Repository of the RFC: https://github.com/inadarei/rfc-healthcheck

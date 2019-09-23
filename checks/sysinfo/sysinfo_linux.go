@@ -1,4 +1,4 @@
-// Package sysinfo provides sysinfo as health details.
+// Package sysinfo provides sysinfo as health checks.
 
 // +build linux
 
@@ -16,18 +16,18 @@ import (
 type sysinfo struct {
 }
 
-func (u *sysinfo) HealthDetails() map[string][]health.Details {
+func (u *sysinfo) HealthChecks() map[string][]health.Checks {
 	si := &syscall.Sysinfo_t{}
 	err := syscall.Sysinfo(si)
 	now := time.Now().UTC().Format(time.RFC3339Nano)
-	var uptime func() health.Details
-	var processes func() health.Details
-	var cpuutil func(componentId string, load uint64) health.Details
-	var memutil func(componentId string, load uint64) health.Details
-	var hostname func() health.Details
+	var uptime func() health.Checks
+	var processes func() health.Checks
+	var cpuutil func(componentId string, load uint64) health.Checks
+	var memutil func(componentId string, load uint64) health.Checks
+	var hostname func() health.Checks
 	if err != nil {
-		cpuutil = func(componentId string, load uint64) health.Details {
-			return health.Details{
+		cpuutil = func(componentId string, load uint64) health.Checks {
+			return health.Checks{
 				ComponentType: "system",
 				ComponentID:   componentId,
 				Status:        health.Fail,
@@ -36,8 +36,8 @@ func (u *sysinfo) HealthDetails() map[string][]health.Details {
 			}
 		}
 		memutil = cpuutil
-		uptime = func() health.Details {
-			return health.Details{
+		uptime = func() health.Checks {
+			return health.Checks{
 				ComponentType: "system",
 				Status:        health.Fail,
 				Output:        err.Error(),
@@ -47,8 +47,8 @@ func (u *sysinfo) HealthDetails() map[string][]health.Details {
 		processes = uptime
 	} else {
 		memunit := fmt.Sprintf("%d bytes", si.Unit)
-		cpuutil = func(componentId string, load uint64) health.Details {
-			return health.Details{
+		cpuutil = func(componentId string, load uint64) health.Checks {
+			return health.Checks{
 				ComponentType: "system",
 				ComponentID:   componentId,
 				ObservedValue: load / 65536.0,
@@ -57,8 +57,8 @@ func (u *sysinfo) HealthDetails() map[string][]health.Details {
 				Time:          now,
 			}
 		}
-		memutil = func(componentId string, memory uint64) health.Details {
-			return health.Details{
+		memutil = func(componentId string, memory uint64) health.Checks {
+			return health.Checks{
 				ComponentType: "system",
 				ComponentID:   componentId,
 				ObservedValue: memory,
@@ -67,8 +67,8 @@ func (u *sysinfo) HealthDetails() map[string][]health.Details {
 				Time:          now,
 			}
 		}
-		uptime = func() health.Details {
-			return health.Details{
+		uptime = func() health.Checks {
+			return health.Checks{
 				ComponentType: "system",
 				ObservedValue: si.Uptime,
 				ObservedUnit:  "s",
@@ -76,8 +76,8 @@ func (u *sysinfo) HealthDetails() map[string][]health.Details {
 				Time:          now,
 			}
 		}
-		processes = func() health.Details {
-			return health.Details{
+		processes = func() health.Checks {
+			return health.Checks{
 				ComponentID:   "Processes",
 				ComponentType: "system",
 				ObservedValue: si.Procs,
@@ -88,8 +88,8 @@ func (u *sysinfo) HealthDetails() map[string][]health.Details {
 	}
 
 	if hn, err := os.Hostname(); err == nil {
-		hostname = func() health.Details {
-			return health.Details{
+		hostname = func() health.Checks {
+			return health.Checks{
 				ComponentID:   "hostname",
 				ComponentType: "system",
 				ObservedValue: hn,
@@ -98,8 +98,8 @@ func (u *sysinfo) HealthDetails() map[string][]health.Details {
 			}
 		}
 	} else {
-		hostname = func() health.Details {
-			return health.Details{
+		hostname = func() health.Checks {
+			return health.Checks{
 				ComponentID:   "hostname",
 				ComponentType: "system",
 				Status:        health.Fail,
@@ -109,7 +109,7 @@ func (u *sysinfo) HealthDetails() map[string][]health.Details {
 		}
 	}
 
-	return map[string][]health.Details{
+	return map[string][]health.Checks{
 		"uptime": {
 			uptime(),
 		},
@@ -139,9 +139,9 @@ func (*sysinfo) AuthorizeHealth(r *http.Request) bool {
 	return true
 }
 
-// Health returns a DetailsProvider that provides sysinfo statistics.
-// On Linux, this will be details from syscall.Sysinfo_t.
+// Health returns a ChecksProvider that provides sysinfo statistics.
+// On Linux, this will be checks from syscall.Sysinfo_t.
 // On other platforms, this provider provides no information.
-func Health() health.DetailsProvider {
+func Health() health.ChecksProvider {
 	return &sysinfo{}
 }

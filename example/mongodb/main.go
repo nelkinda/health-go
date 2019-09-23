@@ -5,7 +5,7 @@ import (
 	"flag"
 	"fmt"
 	"github.com/nelkinda/health-go"
-	"github.com/nelkinda/health-go/details/mongodb"
+	"github.com/nelkinda/health-go/checks/mongodb"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"io"

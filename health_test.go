@@ -20,7 +20,7 @@ func initHandler() {
 	h := New(
 		Health{
 			Version:   "1",
-			ReleaseId: "1.0.0-SNAPSHOT",
+			ReleaseID: "1.0.0-SNAPSHOT",
 		},
 	)
 	handler = h.Handler

@@ -4,7 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"github.com/nelkinda/health-go"
-	"github.com/nelkinda/health-go/details/sendgrid"
+	"github.com/nelkinda/health-go/checks/sendgrid"
 	"io"
 	"net"
 	"net/http"

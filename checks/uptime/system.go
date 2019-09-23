@@ -1,4 +1,4 @@
-// Package uptime provides uptime-related health Details.
+// Package uptime provides uptime-related health Checks.
 package uptime
 
 import (
@@ -11,14 +11,14 @@ import (
 type system struct {
 }
 
-func (u *system) HealthDetails() map[string][]health.Details {
+func (u *system) HealthChecks() map[string][]health.Checks {
 	si := &syscall.Sysinfo_t{}
 	err := syscall.Sysinfo(si)
 	now := time.Now().UTC().Format(time.RFC3339Nano)
-	var uptime func() health.Details
+	var uptime func() health.Checks
 	if err != nil {
-		uptime = func() health.Details {
-			return health.Details{
+		uptime = func() health.Checks {
+			return health.Checks{
 				ComponentType: "system",
 				Status:        health.Fail,
 				Output:        err.Error(),
@@ -26,8 +26,8 @@ func (u *system) HealthDetails() map[string][]health.Details {
 			}
 		}
 	} else {
-		uptime = func() health.Details {
-			return health.Details{
+		uptime = func() health.Checks {
+			return health.Checks{
 				ComponentType: "system",
 				ObservedValue: si.Uptime,
 				ObservedUnit:  "s",
@@ -36,7 +36,7 @@ func (u *system) HealthDetails() map[string][]health.Details {
 			}
 		}
 	}
-	return map[string][]health.Details{
+	return map[string][]health.Checks{
 		"uptime": {
 			uptime(),
 		},
@@ -47,7 +47,7 @@ func (*system) AuthorizeHealth(r *http.Request) bool {
 	return true
 }
 
-// System returns a DetailsProvider for health details about the system uptime.
-func System() health.DetailsProvider {
+// System returns a ChecksProvider for health checks about the system uptime.
+func System() health.ChecksProvider {
 	return &system{}
 }

@@ -33,8 +33,8 @@ func waitForIntOrTerm() {
 
 type custom struct{}
 
-func (*custom) HealthDetails() map[string][]health.Details {
-	return map[string][]health.Details{"custom": {{ComponentID: "custom-component", Status: health.Pass}}}
+func (*custom) HealthChecks() map[string][]health.Checks {
+	return map[string][]health.Checks{"custom": {{ComponentID: "custom-component", Status: health.Pass}}}
 }
 
 func (*custom) AuthorizeHealth(r *http.Request) bool {

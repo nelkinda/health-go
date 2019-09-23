@@ -11,7 +11,7 @@ type sendGrid struct{}
 
 const sendGridURL = "http://status.sendgrid.com/"
 
-func getSendGridStatus() health.Details {
+func getSendGridStatus() health.Checks {
 	client := &http.Client{Timeout: time.Second * 2}
 	req, err := http.NewRequest(http.MethodGet, sendGridURL, nil)
 	if err != nil {
@@ -20,12 +20,12 @@ func getSendGridStatus() health.Details {
 	req.Header.Set("Accept", "application/json")
 	res, err := client.Do(req)
 	if err != nil {
-		return health.Details{Status: health.Fail, Output: err.Error()}
+		return health.Checks{Status: health.Fail, Output: err.Error()}
 	}
 	sendGridHealth := make(map[string]interface{})
 	err = json.NewDecoder(res.Body).Decode(&sendGridHealth)
 	if err != nil {
-		return health.Details{Status: health.Fail, Output: err.Error()}
+		return health.Checks{Status: health.Fail, Output: err.Error()}
 	}
 	sendGridStatus := sendGridHealth["status"]
 	switch vv := sendGridStatus.(type) {
@@ -33,35 +33,35 @@ func getSendGridStatus() health.Details {
 		indicator := vv["indicator"]
 		switch indicator {
 		case "none":
-			return health.Details{Status: health.Pass}
+			return health.Checks{Status: health.Pass}
 		case "minor", "major":
-			return health.Details{Status: health.Warn}
+			return health.Checks{Status: health.Warn}
 		default:
 			description := vv["description"]
 			switch descriptionText := description.(type) {
 			case string:
-				return health.Details{Status: health.Fail, Output: descriptionText}
+				return health.Checks{Status: health.Fail, Output: descriptionText}
 			default:
-				return health.Details{Status: health.Fail, Output: "Could not get description from SendGrid."}
+				return health.Checks{Status: health.Fail, Output: "Could not get description from SendGrid."}
 			}
 		}
 	}
-	return health.Details{Status: health.Fail, Output: "Could not parse response from SendGrid."}
+	return health.Checks{Status: health.Fail, Output: "Could not parse response from SendGrid."}
 }
 
-func (s *sendGrid) HealthDetails() map[string][]health.Details {
+func (s *sendGrid) HealthChecks() map[string][]health.Checks {
 	now := time.Now().UTC()
-	details := getSendGridStatus()
-	details.Time = now.Format(time.RFC3339Nano)
-	return map[string][]health.Details{"SendGrid": {details}}
+	checks := getSendGridStatus()
+	checks.Time = now.Format(time.RFC3339Nano)
+	return map[string][]health.Checks{"SendGrid": {checks}}
 }
 
 func (*sendGrid) AuthorizeHealth(r *http.Request) bool {
 	return true
 }
 
-// Health returns a DetailsProvider that provides SendGrid health.
+// Health returns a ChecksProvider that provides SendGrid health.
 // SendGrid health is determined by a simple HTTP ping to SendGrid.
-func Health() health.DetailsProvider {
+func Health() health.ChecksProvider {
 	return &sendGrid{}
 }

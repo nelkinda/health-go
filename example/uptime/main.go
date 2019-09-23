@@ -4,7 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"github.com/nelkinda/health-go"
-	"github.com/nelkinda/health-go/details/uptime"
+	"github.com/nelkinda/health-go/checks/uptime"
 	"io"
 	"net"
 	"net/http"
