@@ -1,6 +1,6 @@
 .PHONY: all
 ## Builds and verifies the project.
-all: build test lint
+all: build test
 
 .PHONY: pipeline
 ## Runs the same thing as the pipeline.
