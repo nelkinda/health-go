@@ -25,7 +25,7 @@
 //  }
 //
 // References
-// * Official draft: https://tools.ietf.org/id/draft-inadarei-api-health-check-03.html
+// * Official draft: https://tools.ietf.org/id/draft-inadarei-api-health-check-04.html
 // * Latest published draft: https://inadarei.github.io/rfc-healthcheck/
 // * Git Repository of the RFC: https://github.com/inadarei/rfc-healthcheck
 package health
@@ -43,7 +43,7 @@ type Status string
 
 // Health Check Response Format for HTTP APIs uses JSON format described in RFC 8259 and has the media type "application/health+json".
 // Its content consists of a single mandatory root field ("status") and several optional fields:
-// See https://tools.ietf.org/id/draft-inadarei-api-health-check-03.html#section-3
+// See https://tools.ietf.org/id/draft-inadarei-api-health-check-04.html#section-3
 type Health struct {
 
 	// status: (required) indicates whether the service status is acceptable or not.
@@ -63,46 +63,48 @@ type Health struct {
 	// As such, its health is a conduit to the health of the component.
 	// Clients SHOULD assume that the HTTP response code returned by the health endpoint is applicable to the entire component (e.g. a larger API or a microservice).
 	// This is compatible with the behavior that current infrastructural tooling expects: load-balancers, service discoveries and others, utilizing health-checks.
-	// See https://tools.ietf.org/id/draft-inadarei-api-health-check-03.html#section-3.1
+	// See https://tools.ietf.org/id/draft-inadarei-api-health-check-04.html#section-3.1
 	Status Status `json:"status" example:"pass"`
 
 	// version: (optional) public version of the service
-	// See https://tools.ietf.org/id/draft-inadarei-api-health-check-03.html#section-3.2
+	// See https://tools.ietf.org/id/draft-inadarei-api-health-check-04.html#section-3.2
 	Version string `json:"version,omitempty" example:"1"`
 
 	// releaseId: (optional) in well-designed APIs, backwards-compatible changes in the service should not update a version number.
 	// APIs usually change their version number as infrequently as possible, to preserve stable interface.
 	// However, implementation of an API may change much more frequently, which leads to the importance of having separate "release number" or "releaseID" that is different from the public version of the API.
-	// See https://tools.ietf.org/id/draft-inadarei-api-health-check-03.html#section-3.3
+	// See https://tools.ietf.org/id/draft-inadarei-api-health-check-04.html#section-3.3
 	// [Note: It is probably recommended to use Semantic Versioning for this field, see https://semver.org/]
 	ReleaseID string `json:"releaseId,omitempty" example:"1.14.2-SNAPSHOT"`
 
 	// notes: (optional) array of notes relevant to current state of health
-	// See https://tools.ietf.org/id/draft-inadarei-api-health-check-03.html#section-3.4
+	// See https://tools.ietf.org/id/draft-inadarei-api-health-check-04.html#section-3.4
 	Notes []string `json:"notes,omitempty"`
 
 	// output: (optional) raw error output, in case of "fail" or "warn" states.
 	// This field SHOULD be omitted for "pass" state.
-	// See https://tools.ietf.org/id/draft-inadarei-api-health-check-03.html#section-3.5
+	// See https://tools.ietf.org/id/draft-inadarei-api-health-check-04.html#section-3.5
 	Output string `json:"output,omitempty"`
 
 	// checks (optional) is an object that provides detailed health status of additional downstream systems and endpoints which can affect the overall health of the main API.
 	// Please refer to the "The Checks Object" section for more information.
-	// See https://tools.ietf.org/id/draft-inadarei-api-health-check-03.html#section-3.6
+	// See https://tools.ietf.org/id/draft-inadarei-api-health-check-04.html#section-3.6
 	Checks map[string][]Checks `json:"checks,omitempty"`
 
-	// links (optional) is an array of objects containing link relations and URIs [RFC3986] for external links that MAY contain more information about the health of the endpoint.
+	// links (optional) is an objects containing link relations and URIs [RFC3986] for external links that MAY contain more information about the health of the endpoint.
+	// All values of this object SHALL be URIs.
+	// Keys MAY also be URIs.
 	// Per web-linking standards [RFC8288] a link relationship SHOULD either be a common/registered one or be indicated as a URI, to avoid name clashes.
 	// If a "self" link is provided, it MAY be used by clients to check health via HTTP response code, as mentioned above.
-	// See https://tools.ietf.org/id/draft-inadarei-api-health-check-03.html#section-3.7
+	// See https://tools.ietf.org/id/draft-inadarei-api-health-check-04.html#section-3.7
 	Links map[string]string `json:"links,omitempty"`
 
 	// serviceId (optional) is a unique identifier of the service, in the application scope.
-	// See https://tools.ietf.org/id/draft-inadarei-api-health-check-03.html#section-3.8
+	// See https://tools.ietf.org/id/draft-inadarei-api-health-check-04.html#section-3.8
 	ServiceID string `json:"serviceId,omitempty"`
 
 	// description (optional) is a human-friendly description of the service.
-	// See https://tools.ietf.org/id/draft-inadarei-api-health-check-03.html#section-3.9
+	// See https://tools.ietf.org/id/draft-inadarei-api-health-check-04.html#section-3.9
 	Description string `json:"description,omitempty"`
 }
 
@@ -128,11 +130,11 @@ type Health struct {
 //   * A URI that indicates extra semantics and processing rules that MAY be provided by a resource at the other end of the URI.
 //     URIs do not have to be dereferenceable, however.
 //     They are just a namespace, and the meaning of a namespace CAN be provided by any convenient means (e.g. publishing an RFC, Swagger document or a nicely printed book).
-// See https://tools.ietf.org/id/draft-inadarei-api-health-check-03.html#section-4
+// See https://tools.ietf.org/id/draft-inadarei-api-health-check-04.html#section-4
 type Checks struct {
 	// componentId: (optional) is a unique identifier of an instance of a specific sub-component/dependency of a service.
 	// Multiple objects with the same componentID MAY appear in the details, if they are from different nodes.
-	// See https://tools.ietf.org/id/draft-inadarei-api-health-check-03.html#section-4.1
+	// See https://tools.ietf.org/id/draft-inadarei-api-health-check-04.html#section-4.1
 	ComponentID string `json:"componentId,omitempty"`
 
 	// componentType: (optional) SHOULD be present if componentName is present.
@@ -145,11 +147,11 @@ type Checks struct {
 	// * A URI that indicates extra semantics and processing rules that MAY be provided by a resource at the other end of the URI.
 	//   URIs do not have to be dereferenceable, however.
 	//   They are just a namespace, and the meaning of a namespace CAN be provided by any convenient means (e.g. publishing an RFC, Swagger document or a nicely printed book).
-	// See https://tools.ietf.org/id/draft-inadarei-api-health-check-03.html#section-4.2
+	// See https://tools.ietf.org/id/draft-inadarei-api-health-check-04.html#section-4.2
 	ComponentType string `json:"componentType,omitempty"`
 
 	// observedValue: (optional) could be any valid JSON value, such as: string, number, object, array or literal.
-	// See https://tools.ietf.org/id/draft-inadarei-api-health-check-03.html#section-4.3
+	// See https://tools.ietf.org/id/draft-inadarei-api-health-check-04.html#section-4.3
 	ObservedValue interface{} `json:"observedValue,omitempty"`
 
 	// observedUnit (optional) SHOULD be present if observedValue is present.
@@ -158,33 +160,35 @@ type Checks struct {
 	// * A common and standard term from a well-known source such as schema.org, IANA, microformats, or a standards document such as RFC 3339.
 	// * A URI that indicates extra semantics and processing rules that MAY be provided by a resource at the other end of the URI.
 	//   URIs do not have to be dereferencable, however.
-	//   They are just a namespace, and the meaning of a namespace CAN be provided by any convenient means (e.g. publishing an RFC, Swagger document or a nicely printed book).
-	// See https://tools.ietf.org/id/draft-inadarei-api-health-check-03.html#section-4.4
+	//   They are just a namespace, and the meaning of a namespace CAN be provided by any convenient means (e.g. publishing an RFC, Open API Spec document or a nicely printed book).
+	// See https://tools.ietf.org/id/draft-inadarei-api-health-check-04.html#section-4.4
 	ObservedUnit string `json:"observedUnit,omitempty"`
 
 	// status (optional) has the exact same meaning as the top-level "output" element, but for the sub-component/downstream dependency represented by the details object.
-	// See https://tools.ietf.org/id/draft-inadarei-api-health-check-03.html#section-4.5
+	// See https://tools.ietf.org/id/draft-inadarei-api-health-check-04.html#section-4.5
 	Status Status `json:"status" example:"pass"`
 
+	// affectedEndpoints (optional) is a JSON array containing URI Templates as defined by [RFC6570].
+	// This field SHOULD be omitted if the "status" field is present and has a value equal to "pass".
 	// A typical API has many URI endpoints.
 	// Most of the time we are interested in the overall health of the API, without diving into details.
 	// That said, sometimes operational and resilience middleware needs to know more details about the health of the API (which is why "checks" property provides details).
 	// In such cases, we often need to indicate which particular endpoints are affected by a particular check's troubles vs. other endpoints that may be fine.
-	// The "affectedEndpoints" property is a JSON array containing URI Templates as defined by RFC6570.
-	// See https://tools.ietf.org/id/draft-inadarei-api-health-check-03.html#section-4.6
+	// See https://tools.ietf.org/id/draft-inadarei-api-health-check-04.html#section-4.6
 	AffectedEndpoints []string `json:"affectedEndpoints,omitempty"`
 
 	// time (optional) is the date-time, in ISO8601 format, at which the reading of the observedValue was recorded.
 	// This assumes that the value can be cached and the reading typically doesn't happen in real time, for performance and scalability purposes.
-	// See https://tools.ietf.org/id/draft-inadarei-api-health-check-03.html#section-4.7
+	// See https://tools.ietf.org/id/draft-inadarei-api-health-check-04.html#section-4.7
 	Time string `json:"time,omitempty" example:"2019-02-20T22:01:44,654015561+00:00"`
 
 	// output (optional) has the exact same meaning as the top-level "output" element, but for the sub-component/downstream dependency represented by the details object.
-	// See https://tools.ietf.org/id/draft-inadarei-api-health-check-03.html#section-4.8
+	// As is the case for the top-level element, this field SHOULD be omitted for "pass" state of a downstream dependency.
+	// See https://tools.ietf.org/id/draft-inadarei-api-health-check-04.html#section-4.8
 	Output string `json:"output,omitempty"`
 
 	// links (optional) has the exact same meaning as the top-level "links" element, but for the sub-component/downstream dependency represented by the details object.
-	// See https://tools.ietf.org/id/draft-inadarei-api-health-check-03.html#section-4.9
+	// See https://tools.ietf.org/id/draft-inadarei-api-health-check-04.html#section-4.9
 	Links map[string]string `json:"links,omitempty"`
 }
 

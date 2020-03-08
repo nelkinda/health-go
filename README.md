@@ -78,6 +78,6 @@ func main() {
 ```
 
 ## References
-* Official draft: https://tools.ietf.org/id/draft-inadarei-api-health-check-03.html
+* Official draft: https://tools.ietf.org/id/draft-inadarei-api-health-check-04.html
 * Latest published draft: https://inadarei.github.io/rfc-healthcheck/
 * Git Repository of the RFC: https://github.com/inadarei/rfc-healthcheck
