@@ -1,5 +1,7 @@
 # `health-go`
 
+![Go](https://github.com/nelkinda/health-go/workflows/Go/badge.svg)
+
 Golang implementation of the upcoming IETF RFC Health Check Response Format for HTTP APIs.
 
 ## Usage
