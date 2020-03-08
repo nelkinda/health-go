@@ -1,2 +1,13 @@
-.idea
+# IntelliJ IDEA
+.idea/
+*.iml
+
+# Make
+.makehelp/
+.help.mk
+
+# swaggo
 docs
+
+# Vim
+*.swp
