@@ -8,8 +8,13 @@ pipeline: all
 
 .PHONY: build
 ## Builds (compiles) the project.
-build:
+build: deps
 	go build ./...
+
+.PHONY: deps
+## Gets the dependencies.
+deps:
+	go get -v -t -d ./...
 
 .PHNOY: test
 ## Runs the tests.
