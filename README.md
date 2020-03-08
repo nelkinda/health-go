@@ -77,6 +77,52 @@ func main() {
 }
 ```
 
+## Sample Output (no configured checks)
+```json
+{
+   "releaseId" : "1.0.0-SNAPSHOT",
+   "status" : "pass",
+   "version" : "1"
+}
+```
+
+## Sample Output: `mongodb`
+```json
+{
+   "releaseId" : "1.0.0-SNAPSHOT",
+   "status" : "pass",
+   "version" : "1",
+   "checks" : {
+      "mongodb:responseTime" : [
+         {
+            "componentId" : "mongodb://127.0.0.1:27017",
+            "observedUnit" : "ns",
+            "time" : "2020-03-08T16:48:01.594380018Z",
+            "observedValue" : 147640,
+            "status" : "pass"
+         }
+      ]
+   }
+}
+```
+
+## Sample Output: `sendgrid`
+```json
+{
+   "status" : "pass",
+   "version" : "1",
+   "releaseId" : "1.0.0-SNAPSHOT",
+   "checks" : {
+      "SendGrid" : [
+         {
+            "status" : "pass",
+            "time" : "2020-03-08T16:45:34.427704957Z"
+         }
+      ]
+   }
+}
+```
+
 ## Sample Output: `uptime`
 ```json
 {
