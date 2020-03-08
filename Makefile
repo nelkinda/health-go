@@ -13,12 +13,12 @@ build: deps generate
 
 .PHONY: deps
 ## Gets the dependencies.
-deps:
+deps: generate
 	go get -v -t -d ./...
 
 .PHONY: generate
 ## Generates source code.
-generate: deps
+generate:
 	go generate ./...
 
 .PHNOY: test
