@@ -247,7 +247,7 @@ type Service struct {
 	// The providers for checks of this health service.
 	checksProviders []ChecksProvider
 	// The template for the outer health response.
-	template         Health
+	template Health
 }
 
 // New creates a new health service.

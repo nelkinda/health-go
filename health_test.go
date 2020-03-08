@@ -13,6 +13,27 @@ import (
 var variables map[string]string
 var handler http.HandlerFunc
 
+type sampleCheck struct{}
+
+func (s *sampleCheck) HealthChecks() map[string][]Checks {
+	return map[string][]Checks{
+		"sampleCheck": {
+			{
+				ComponentType: "sampleCheck",
+				Status:        Pass,
+			},
+		},
+	}
+}
+
+func (*sampleCheck) AuthorizeHealth(r *http.Request) bool {
+	return true
+}
+
+func SampleCheck() ChecksProvider {
+	return &sampleCheck{}
+}
+
 func initHandler() {
 	if handler != nil {
 		return
@@ -22,6 +43,7 @@ func initHandler() {
 			Version:   "1",
 			ReleaseID: "1.0.0-SNAPSHOT",
 		},
+		SampleCheck(),
 	)
 	handler = h.Handler
 }
@@ -62,7 +84,21 @@ func TestHandlerResponse(t *testing.T) {
 	w := httptest.NewRecorder()
 	handler(w, r)
 
-	err = AssertJSONBytes(t, []byte(`{"status":"pass", "version": "(?P<version>\\d+)", "releaseId": "(?P<releaseId>\\d+\\.\\d+\\.\\d+(?:-\\w+)?)"}`), w.Body.Bytes())
+	err = AssertJSONBytes(t, []byte(`
+        {
+            "status": "pass",
+            "version": "(?P<version>\\d+)",
+            "releaseId": "(?P<releaseId>\\d+\\.\\d+\\.\\d+(?:-\\w+)?)",
+            "checks": {
+                "sampleCheck": [
+                    {
+                        "componentType": "sampleCheck",
+                        "Status": "PASS"
+                    }
+                ]
+            }
+        }
+    `), w.Body.Bytes())
 	if err != nil {
 		t.Error(err)
 	}
