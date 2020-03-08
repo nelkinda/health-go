@@ -2,7 +2,7 @@
 
 ![Go](https://github.com/nelkinda/health-go/workflows/Go/badge.svg)
 
-Golang implementation of the upcoming IETF RFC Health Check Response Format for HTTP APIs.
+Golang implementation of the upcoming [IETF RFC Health Check Response Format](https://tools.ietf.org/id/draft-inadarei-api-health-check-04.html) for HTTP APIs.
 
 ## Usage
 In your go program,
