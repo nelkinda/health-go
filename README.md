@@ -66,11 +66,13 @@ func main() {
 			Version: "1",
 			ReleaseID: "1.0.0-SNAPSHOT",
 		},
-		uptime.System(),
-		uptime.Process(),
-		mongodb.Health(url, client, time.Duration(10)*time.Second, time.Duration(40)*time.Microsecond),
-		sendgrid.Health(),
-		sysinfo.Health(),
+		health.WithChecksProviders(
+			uptime.System(),
+			uptime.Process(),
+			mongodb.Health(url, client, time.Duration(10)*time.Second, time.Duration(40)*time.Microsecond),
+			sendgrid.Health(),
+			sysinfo.Health(),
+		),
 	)
 	http.HandleFunc("/health", h.Handler)
 	http.ListenAndServe(":80", nil)
