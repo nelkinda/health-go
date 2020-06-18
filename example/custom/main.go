@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"flag"
 	"fmt"
 	"github.com/nelkinda/health-go"
@@ -33,7 +34,7 @@ func waitForIntOrTerm() {
 
 type custom struct{}
 
-func (*custom) HealthChecks() map[string][]health.Checks {
+func (*custom) HealthChecks(ctx context.Context) map[string][]health.Checks {
 	return map[string][]health.Checks{"custom": {{ComponentID: "custom-component", Status: health.Pass}}}
 }
 
@@ -42,7 +43,7 @@ func (*custom) AuthorizeHealth(r *http.Request) bool {
 }
 
 func mustStart(port int) (net.Listener, string) {
-	h := health.New(health.Health{Version: "1", ReleaseID: "1.0.0-SNAPSHOT"}, &custom{})
+	h := health.New(health.Health{Version: "1", ReleaseID: "1.0.0-SNAPSHOT"}, health.WithChecksProviders(&custom{}))
 	mux := http.NewServeMux()
 	mux.HandleFunc("/health", h.Handler)
 	listener, err := net.Listen("tcp", fmt.Sprintf(":%v", port))

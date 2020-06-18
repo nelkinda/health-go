@@ -1,6 +1,7 @@
 package sendgrid
 
 import (
+	"context"
 	"encoding/json"
 	"github.com/nelkinda/health-go"
 	"net/http"
@@ -49,7 +50,7 @@ func getSendGridStatus() health.Checks {
 	return health.Checks{Status: health.Fail, Output: "Could not parse response from SendGrid."}
 }
 
-func (s *sendGrid) HealthChecks() map[string][]health.Checks {
+func (s *sendGrid) HealthChecks(ctx context.Context) map[string][]health.Checks {
 	now := time.Now().UTC()
 	checks := getSendGridStatus()
 	checks.Time = now.Format(time.RFC3339Nano)

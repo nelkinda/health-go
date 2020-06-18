@@ -1,9 +1,11 @@
 package health
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"github.com/christianhujer/assert"
+	"github.com/opentracing/opentracing-go"
 	"net/http"
 	"net/http/httptest"
 	"regexp"
@@ -15,7 +17,7 @@ var handler http.HandlerFunc
 
 type sampleCheck struct{}
 
-func (s *sampleCheck) HealthChecks() map[string][]Checks {
+func (s *sampleCheck) HealthChecks(ctx context.Context) map[string][]Checks {
 	return map[string][]Checks{
 		"sampleCheck": {
 			{
@@ -43,7 +45,8 @@ func initHandler() {
 			Version:   "1",
 			ReleaseID: "1.0.0-SNAPSHOT",
 		},
-		SampleCheck(),
+		WithChecksProviders(SampleCheck()),
+		WithTracer(&opentracing.NoopTracer{}, opentracing.HTTPHeaders),
 	)
 	handler = h.Handler
 }

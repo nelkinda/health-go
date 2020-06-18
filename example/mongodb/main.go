@@ -51,7 +51,9 @@ func mustStart(port int) (net.Listener, string) {
 			Version:   "1",
 			ReleaseID: "1.0.0-SNAPSHOT",
 		},
-		mongodb.Health(url, client, time.Duration(1)*time.Second, time.Duration(200)*time.Millisecond),
+		health.WithChecksProviders(
+			mongodb.Health(url, client, time.Duration(1)*time.Second, time.Duration(200)*time.Millisecond),
+		),
 	)
 	mux := http.NewServeMux()
 	mux.HandleFunc("/health", h.Handler)

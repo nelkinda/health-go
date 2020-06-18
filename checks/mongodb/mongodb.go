@@ -18,7 +18,7 @@ type mongodb struct {
 	threshold   time.Duration
 }
 
-func (m *mongodb) HealthChecks() map[string][]health.Checks {
+func (m *mongodb) HealthChecks(ctx context.Context) map[string][]health.Checks {
 	start := time.Now().UTC()
 	startTime := start.Format(time.RFC3339Nano)
 	ctx, cancel := context.WithTimeout(context.Background(), m.timeout)

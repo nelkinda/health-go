@@ -31,9 +31,13 @@
 package health
 
 import (
+	"context"
 	"encoding/json"
+	"fmt"
 	"github.com/nelkinda/http-go/header"
 	"github.com/nelkinda/http-go/mimetype"
+	"github.com/opentracing/opentracing-go"
+	"github.com/opentracing/opentracing-go/ext"
 	"net/http"
 )
 
@@ -206,7 +210,7 @@ const (
 // ChecksProvider provides health checks, potentially with prior authorization.
 type ChecksProvider interface {
 	// HealthChecks asks the ChecksProvider for its current Health status.
-	HealthChecks() map[string][]Checks
+	HealthChecks(ctx context.Context) map[string][]Checks
 
 	// AuthorizeHealth asks whether the ChecksProvider authorizes Checks to be included in a Health response to this request.
 	AuthorizeHealth(r *http.Request) bool
@@ -219,6 +223,21 @@ type ChecksProvider interface {
 // @Success 200 {object} health.Health
 // @Router /health [GET]
 func (h *Service) Handler(w http.ResponseWriter, r *http.Request) {
+	if h.tracer != nil {
+		opts := []opentracing.StartSpanOption{ext.SpanKindRPCServer}
+		carrier := opentracing.HTTPHeadersCarrier(r.Header)
+		for _, format := range h.formats {
+			if spanCtx, err := opentracing.GlobalTracer().Extract(format, carrier); err == nil {
+				opts = append(opts, opentracing.ChildOf(spanCtx))
+			}
+		}
+		operation := fmt.Sprintf("%s %s", r.Method, r.URL.EscapedPath())
+		span := opentracing.StartSpan(operation, opts...)
+		defer span.Finish()
+		_ = span.Tracer().Inject(span.Context(), opentracing.HTTPHeaders, carrier)
+		ctx := opentracing.ContextWithSpan(r.Context(), span)
+		r = r.Clone(ctx)
+	}
 	w.Header().Add(header.ContentType, mimetype.ApplicationHealthJson)
 	if r.Method == http.MethodOptions {
 		w.Header().Set("Allow", "OPTIONS, GET, HEAD")
@@ -234,7 +253,7 @@ func (h *Service) Handler(w http.ResponseWriter, r *http.Request) {
 	h.template.Status = Pass
 	h.template.Checks = make(map[string][]Checks)
 	for _, checksProvider := range h.checksProviders {
-		checksMap := checksProvider.HealthChecks()
+		checksMap := checksProvider.HealthChecks(r.Context())
 		for checksKey, checks := range checksMap {
 			h.template.Checks[checksKey] = append(h.template.Checks[checksKey], checks...)
 		}
@@ -248,9 +267,34 @@ type Service struct {
 	checksProviders []ChecksProvider
 	// The template for the outer health response.
 	template Health
+
+	// The tracer for distributed application tracing
+	tracer  opentracing.Tracer
+	formats []interface{}
 }
 
+type Option func(s *Service)
+
 // New creates a new health service.
-func New(template Health, checksProviders ...ChecksProvider) *Service {
-	return &Service{checksProviders: checksProviders, template: template}
+func New(template Health, options ...Option) *Service {
+	s := Service{template: template}
+	for _, option := range options {
+		option(&s)
+	}
+	return &s
+}
+
+// WithChecksProviders for adding checks of this health service.
+func WithChecksProviders(checksProviders ...ChecksProvider) Option {
+	return func(s *Service) {
+		s.checksProviders = checksProviders
+	}
+}
+
+// WithTracer to add trace
+func WithTracer(tracer opentracing.Tracer, extractFormats ...interface{}) Option {
+	return func(s *Service) {
+		s.tracer = tracer
+		s.formats = extractFormats
+	}
 }

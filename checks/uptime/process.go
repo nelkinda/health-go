@@ -1,6 +1,7 @@
 package uptime
 
 import (
+	"context"
 	"github.com/nelkinda/health-go"
 	"net/http"
 	"time"
@@ -10,7 +11,7 @@ type process struct {
 	start time.Time
 }
 
-func (u *process) HealthChecks() map[string][]health.Checks {
+func (u *process) HealthChecks(ctx context.Context) map[string][]health.Checks {
 	now := time.Now().UTC().Format(time.RFC3339Nano)
 	return map[string][]health.Checks{
 		"uptime": {

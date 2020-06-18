@@ -38,8 +38,10 @@ func mustStart(port int) (net.Listener, string) {
 			Version:   "1",
 			ReleaseID: "1.0.0-SNAPSHOT",
 		},
-		uptime.System(),
-		uptime.Process(),
+		health.WithChecksProviders(
+			uptime.System(),
+			uptime.Process(),
+		),
 	)
 	mux := http.NewServeMux()
 	mux.HandleFunc("/health", h.Handler)

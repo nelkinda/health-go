@@ -1,6 +1,7 @@
 package sendgrid
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"testing"
@@ -22,6 +23,6 @@ const sampleResponse = `{
 
 func TestSendGrid_HealthChecks(t *testing.T) {
 	sendGrid := sendGrid{}
-	checks := sendGrid.HealthChecks()
+	checks := sendGrid.HealthChecks(context.Background())
 	_, _ = fmt.Fprintf(os.Stderr, "%v\n", checks)
 }
