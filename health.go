@@ -224,17 +224,19 @@ type ChecksProvider interface {
 // @Router /health [GET]
 func (h *Service) Handler(w http.ResponseWriter, r *http.Request) {
 	if h.tracer != nil {
-		opts := []opentracing.StartSpanOption{ext.SpanKindRPCServer}
-		carrier := opentracing.HTTPHeadersCarrier(r.Header)
-		for _, format := range h.formats {
-			if spanCtx, err := opentracing.GlobalTracer().Extract(format, carrier); err == nil {
-				opts = append(opts, opentracing.ChildOf(spanCtx))
+		span := opentracing.SpanFromContext(r.Context())
+		if span == nil {
+			carrier := opentracing.HTTPHeadersCarrier(r.Header)
+			opts := []opentracing.StartSpanOption{ext.SpanKindRPCServer}
+			for _, format := range h.formats {
+				if spanCtx, err := opentracing.GlobalTracer().Extract(format, carrier); err == nil {
+					opts = append(opts, opentracing.ChildOf(spanCtx))
+				}
 			}
+			operation := fmt.Sprintf("%s %s", r.Method, r.URL.EscapedPath())
+			span = opentracing.StartSpan(operation, opts...)
 		}
-		operation := fmt.Sprintf("%s %s", r.Method, r.URL.EscapedPath())
-		span := opentracing.StartSpan(operation, opts...)
 		defer span.Finish()
-		_ = span.Tracer().Inject(span.Context(), opentracing.HTTPHeaders, carrier)
 		ctx := opentracing.ContextWithSpan(r.Context(), span)
 		r = r.Clone(ctx)
 	}
