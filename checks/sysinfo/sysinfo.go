@@ -12,7 +12,7 @@ import (
 type sysinfo struct {
 }
 
-func (u *sysinfo) HealthChecks(ctx context.Context) map[string][]health.Checks {
+func (u *sysinfo) HealthChecks() map[string][]health.Checks {
 	return map[string][]health.Checks{}
 }
 

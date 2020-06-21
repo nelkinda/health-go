@@ -1,6 +1,7 @@
 # `health-go`
 
 ![Go](https://github.com/nelkinda/health-go/workflows/Go/badge.svg)
+[![GoDev](https://img.shields.io/static/v1?label=go.dev&message=doc&color=007d9c&logo=go)](https://pkg.go.dev/mod/github.com/nelkinda/health-go)
 
 Golang implementation of the upcoming [IETF RFC Health Check Response Format](https://tools.ietf.org/id/draft-inadarei-api-health-check-04.html) for HTTP APIs.
 
@@ -66,13 +67,11 @@ func main() {
 			Version: "1",
 			ReleaseID: "1.0.0-SNAPSHOT",
 		},
-		health.WithChecksProviders(
-			uptime.System(),
-			uptime.Process(),
-			mongodb.Health(url, client, time.Duration(10)*time.Second, time.Duration(40)*time.Microsecond),
-			sendgrid.Health(),
-			sysinfo.Health(),
-		),
+        uptime.System(),
+        uptime.Process(),
+        mongodb.Health(url, client, time.Duration(10)*time.Second, time.Duration(40)*time.Microsecond),
+        sendgrid.Health(),
+        sysinfo.Health(),
 	)
 	http.HandleFunc("/health", h.Handler)
 	http.ListenAndServe(":80", nil)

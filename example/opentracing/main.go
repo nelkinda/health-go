@@ -1,13 +1,11 @@
 package main
 
 import (
-	"context"
 	"flag"
 	"fmt"
 	"github.com/nelkinda/health-go"
-	"github.com/nelkinda/health-go/checks/mongodb"
-	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
+	"github.com/opentracing/opentracing-go"
+	"github.com/zevst/health-go-opentracing"
 	"io"
 	"net"
 	"net/http"
@@ -15,7 +13,6 @@ import (
 	"os/signal"
 	"strings"
 	"syscall"
-	"time"
 )
 
 func main() {
@@ -37,21 +34,9 @@ func waitForIntOrTerm() {
 }
 
 func mustStart(port int) (net.Listener, string) {
-	url := "mongodb://127.0.0.1:27017"
-	client, err := mongo.NewClient(options.Client().ApplyURI(url))
-	if err != nil {
-		panic(err)
-	}
-	err = client.Connect(context.Background())
-	if err != nil {
-		panic(err)
-	}
 	h := health.New(
-		health.Health{
-			Version:   "1",
-			ReleaseID: "1.0.0-SNAPSHOT",
-		},
-		mongodb.Health(url, client, time.Duration(1)*time.Second, time.Duration(200)*time.Millisecond),
+		health.Health{Version: "1", ReleaseID: "1.0.0-SNAPSHOT"},
+		health_go_opentracing.NewOpenTracingPlugin(opentracing.NoopTracer{}),
 	)
 	mux := http.NewServeMux()
 	mux.HandleFunc("/health", h.Handler)

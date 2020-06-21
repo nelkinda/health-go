@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/christianhujer/assert"
-	"github.com/opentracing/opentracing-go"
 	"net/http"
 	"net/http/httptest"
 	"regexp"
@@ -17,7 +16,7 @@ var handler http.HandlerFunc
 
 type sampleCheck struct{}
 
-func (s *sampleCheck) HealthChecks(ctx context.Context) map[string][]Checks {
+func (s *sampleCheck) HealthChecks() map[string][]Checks {
 	return map[string][]Checks{
 		"sampleCheck": {
 			{
@@ -28,12 +27,41 @@ func (s *sampleCheck) HealthChecks(ctx context.Context) map[string][]Checks {
 	}
 }
 
-func (*sampleCheck) AuthorizeHealth(r *http.Request) bool {
+func (*sampleCheck) AuthorizeHealth(*http.Request) bool {
 	return true
 }
 
 func SampleCheck() ChecksProvider {
 	return &sampleCheck{}
+}
+
+type sampleContextCheck struct{}
+
+func (s *sampleContextCheck) HealthChecks(context.Context) map[string][]Checks {
+	return map[string][]Checks{
+		"sampleCheck": {
+			{
+				ComponentType: "sampleCheck",
+				Status:        Pass,
+			},
+		},
+	}
+}
+
+func SampleContextCheck() ProviderContext {
+	return new(sampleContextCheck)
+}
+
+type samplePlugin struct{}
+
+func (s *samplePlugin) Start(http.ResponseWriter, *http.Request) {
+}
+
+func (s *samplePlugin) End(http.ResponseWriter, *http.Request) {
+}
+
+func SamplePlugin() HandlerPlugin {
+	return new(samplePlugin)
 }
 
 func initHandler() {
@@ -45,8 +73,9 @@ func initHandler() {
 			Version:   "1",
 			ReleaseID: "1.0.0-SNAPSHOT",
 		},
-		WithChecksProviders(SampleCheck()),
-		WithTracer(&opentracing.NoopTracer{}, opentracing.HTTPHeaders),
+		SampleCheck(),
+		SampleContextCheck(),
+		SamplePlugin(),
 	)
 	handler = h.Handler
 }

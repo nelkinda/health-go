@@ -33,11 +33,8 @@ package health
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"github.com/nelkinda/http-go/header"
 	"github.com/nelkinda/http-go/mimetype"
-	"github.com/opentracing/opentracing-go"
-	"github.com/opentracing/opentracing-go/ext"
 	"net/http"
 )
 
@@ -207,11 +204,26 @@ const (
 	Warn Status = "warn"
 )
 
-// ChecksProvider provides health checks, potentially with prior authorization.
-type ChecksProvider interface {
+type Provider interface {
+	HealthChecks() map[string][]Checks
+}
+
+type ProviderContext interface {
 	// HealthChecks asks the ChecksProvider for its current Health status.
 	HealthChecks(ctx context.Context) map[string][]Checks
+}
 
+type HandlerPlugin interface {
+	Start(w http.ResponseWriter, r *http.Request)
+	End(w http.ResponseWriter, r *http.Request)
+}
+
+// Deprecated. Use Provider or ProviderContext
+// ChecksProvider provides health checks, potentially with prior authorization.
+type ChecksProvider interface {
+	Provider
+
+	// TODO: the method is not used in code
 	// AuthorizeHealth asks whether the ChecksProvider authorizes Checks to be included in a Health response to this request.
 	AuthorizeHealth(r *http.Request) bool
 }
@@ -223,23 +235,15 @@ type ChecksProvider interface {
 // @Success 200 {object} health.Health
 // @Router /health [GET]
 func (h *Service) Handler(w http.ResponseWriter, r *http.Request) {
-	if h.tracer != nil {
-		span := opentracing.SpanFromContext(r.Context())
-		if span == nil {
-			carrier := opentracing.HTTPHeadersCarrier(r.Header)
-			opts := []opentracing.StartSpanOption{ext.SpanKindRPCServer}
-			for _, format := range h.formats {
-				if spanCtx, err := opentracing.GlobalTracer().Extract(format, carrier); err == nil {
-					opts = append(opts, opentracing.ChildOf(spanCtx))
-				}
-			}
-			operation := fmt.Sprintf("%s %s", r.Method, r.URL.EscapedPath())
-			span = opentracing.StartSpan(operation, opts...)
-		}
-		defer span.Finish()
-		ctx := opentracing.ContextWithSpan(r.Context(), span)
-		r = r.Clone(ctx)
+	for _, plugin := range h.plugins {
+		plugin.Start(w, r)
 	}
+	defer func() {
+		for _, plugin := range h.plugins {
+			plugin.End(w, r)
+		}
+	}()
+
 	w.Header().Add(header.ContentType, mimetype.ApplicationHealthJson)
 	if r.Method == http.MethodOptions {
 		w.Header().Set("Allow", "OPTIONS, GET, HEAD")
@@ -254,10 +258,16 @@ func (h *Service) Handler(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 	h.template.Status = Pass
 	h.template.Checks = make(map[string][]Checks)
-	for _, checksProvider := range h.checksProviders {
-		checksMap := checksProvider.HealthChecks(r.Context())
-		for checksKey, checks := range checksMap {
-			h.template.Checks[checksKey] = append(h.template.Checks[checksKey], checks...)
+	for _, providers := range h.providers {
+		var checksMap map[string][]Checks
+		switch v := providers.(type) {
+		case Provider:
+			checksMap = v.HealthChecks()
+		case ProviderContext:
+			checksMap = v.HealthChecks(r.Context())
+		}
+		for key, value := range checksMap {
+			h.template.Checks[key] = append(h.template.Checks[key], value...)
 		}
 	}
 	_ = json.NewEncoder(w).Encode(h.template)
@@ -266,37 +276,27 @@ func (h *Service) Handler(w http.ResponseWriter, r *http.Request) {
 // Service describes an instance of a health service.
 type Service struct {
 	// The providers for checks of this health service.
-	checksProviders []ChecksProvider
+	providers []interface{}
 	// The template for the outer health response.
 	template Health
-
-	// The tracer for distributed application tracing
-	tracer  opentracing.Tracer
-	formats []interface{}
+	// Plugins for modifying request and response
+	plugins []HandlerPlugin
 }
-
-type Option func(s *Service)
 
 // New creates a new health service.
-func New(template Health, options ...Option) *Service {
+//
+// Possible options:
+//	Provider|ProviderContext. Please do not use deprecated ChecksProvider interface
+//	HandlerPlugin
+func New(template Health, options ...interface{}) *Service {
 	s := Service{template: template}
 	for _, option := range options {
-		option(&s)
+		switch o := option.(type) {
+		case ChecksProvider, Provider, ProviderContext:
+			s.providers = append(s.providers, o)
+		case HandlerPlugin:
+			s.plugins = append(s.plugins, o)
+		}
 	}
 	return &s
-}
-
-// WithChecksProviders for adding checks of this health service.
-func WithChecksProviders(checksProviders ...ChecksProvider) Option {
-	return func(s *Service) {
-		s.checksProviders = checksProviders
-	}
-}
-
-// WithTracer to add trace
-func WithTracer(tracer opentracing.Tracer, extractFormats ...interface{}) Option {
-	return func(s *Service) {
-		s.tracer = tracer
-		s.formats = extractFormats
-	}
 }

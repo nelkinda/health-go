@@ -5,7 +5,6 @@
 package sysinfo
 
 import (
-	"context"
 	"fmt"
 	"github.com/nelkinda/health-go"
 	"net/http"
@@ -17,7 +16,7 @@ import (
 type sysinfo struct {
 }
 
-func (u *sysinfo) HealthChecks(ctx context.Context) map[string][]health.Checks {
+func (u *sysinfo) HealthChecks() map[string][]health.Checks {
 	si := &syscall.Sysinfo_t{}
 	err := syscall.Sysinfo(si)
 	now := time.Now().UTC().Format(time.RFC3339Nano)
@@ -136,7 +135,7 @@ func (u *sysinfo) HealthChecks(ctx context.Context) map[string][]health.Checks {
 	}
 }
 
-func (*sysinfo) AuthorizeHealth(r *http.Request) bool {
+func (*sysinfo) AuthorizeHealth(*http.Request) bool {
 	return true
 }
 

@@ -2,7 +2,6 @@
 package uptime
 
 import (
-	"context"
 	"github.com/nelkinda/health-go"
 	"net/http"
 	"syscall"
@@ -12,7 +11,7 @@ import (
 type system struct {
 }
 
-func (u *system) HealthChecks(ctx context.Context) map[string][]health.Checks {
+func (u *system) HealthChecks() map[string][]health.Checks {
 	si := &syscall.Sysinfo_t{}
 	err := syscall.Sysinfo(si)
 	now := time.Now().UTC().Format(time.RFC3339Nano)
@@ -44,7 +43,7 @@ func (u *system) HealthChecks(ctx context.Context) map[string][]health.Checks {
 	}
 }
 
-func (*system) AuthorizeHealth(r *http.Request) bool {
+func (*system) AuthorizeHealth(*http.Request) bool {
 	return true
 }
 
