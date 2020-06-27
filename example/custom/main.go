@@ -37,7 +37,7 @@ func (*custom) HealthChecks() map[string][]health.Checks {
 	return map[string][]health.Checks{"custom": {{ComponentID: "custom-component", Status: health.Pass}}}
 }
 
-func (*custom) AuthorizeHealth(r *http.Request) bool {
+func (*custom) AuthorizeHealth(*http.Request) bool {
 	return true
 }
 

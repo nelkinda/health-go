@@ -45,7 +45,7 @@ func (m *mongodb) HealthChecks() map[string][]health.Checks {
 	return map[string][]health.Checks{"mongodb:responseTime": {checks}}
 }
 
-func (*mongodb) AuthorizeHealth(r *http.Request) bool {
+func (*mongodb) AuthorizeHealth(*http.Request) bool {
 	return true
 }
 

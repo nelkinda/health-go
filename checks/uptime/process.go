@@ -25,7 +25,7 @@ func (u *process) HealthChecks() map[string][]health.Checks {
 	}
 }
 
-func (*process) AuthorizeHealth(r *http.Request) bool {
+func (*process) AuthorizeHealth(*http.Request) bool {
 	return true
 }
 

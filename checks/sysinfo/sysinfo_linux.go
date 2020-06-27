@@ -135,7 +135,7 @@ func (u *sysinfo) HealthChecks() map[string][]health.Checks {
 	}
 }
 
-func (*sysinfo) AuthorizeHealth(r *http.Request) bool {
+func (*sysinfo) AuthorizeHealth(*http.Request) bool {
 	return true
 }
 

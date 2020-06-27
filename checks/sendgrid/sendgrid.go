@@ -56,7 +56,7 @@ func (s *sendGrid) HealthChecks() map[string][]health.Checks {
 	return map[string][]health.Checks{"SendGrid": {checks}}
 }
 
-func (*sendGrid) AuthorizeHealth(r *http.Request) bool {
+func (*sendGrid) AuthorizeHealth(*http.Request) bool {
 	return true
 }
 

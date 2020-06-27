@@ -43,7 +43,7 @@ func (u *system) HealthChecks() map[string][]health.Checks {
 	}
 }
 
-func (*system) AuthorizeHealth(r *http.Request) bool {
+func (*system) AuthorizeHealth(*http.Request) bool {
 	return true
 }
 

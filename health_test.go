@@ -26,7 +26,7 @@ func (s *sampleCheck) HealthChecks() map[string][]Checks {
 	}
 }
 
-func (*sampleCheck) AuthorizeHealth(r *http.Request) bool {
+func (*sampleCheck) AuthorizeHealth(*http.Request) bool {
 	return true
 }
 
