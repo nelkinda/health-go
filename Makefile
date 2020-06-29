@@ -24,6 +24,7 @@ generate:
 .PHNOY: test
 ## Runs the tests.
 test:
+	go test -test.cover .
 	go test ./...
 
 .PHONY: lint

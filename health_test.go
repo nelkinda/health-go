@@ -6,6 +6,7 @@ import (
 	"github.com/christianhujer/assert"
 	"net/http"
 	"net/http/httptest"
+	"os"
 	"regexp"
 	"testing"
 )
@@ -172,4 +173,25 @@ func replace(pattern string) string {
 // Call this before every test case.
 func ResetVariables(_ interface{}) {
 	variables = make(map[string]string)
+}
+
+func assertCoverage() int {
+	if testing.CoverMode() != "" {
+		if c := testing.Coverage(); c < 1.0 {
+			fmt.Printf("Coverage failed at %.1f%%\n", c * 100)
+			return 1
+		}
+	}
+	return 0
+}
+
+func TestMain(m *testing.M) {
+	status := 0
+	if st := m.Run(); st > status {
+		status = st
+	}
+	if st := assertCoverage(); st > status {
+		status = st
+	}
+    os.Exit(status)
 }
