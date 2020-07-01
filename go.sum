@@ -76,6 +76,7 @@ github.com/nelkinda/http-go v0.0.1 h1:RL3RttZzzs/kzQaVPmtv5dxMaWValqCqGNjCXyjPI1
 github.com/nelkinda/http-go v0.0.1/go.mod h1:DxPiZGVufTVSeO63nmVR5QO01TmSC0HHtEIZTHL5QEk=
 github.com/niemeyer/pretty v0.0.0-20200227124842-a10e7caefd8e h1:fD57ERR4JtEqsWbfPhv4DMiApHyliiK5xCTNVSPiaAs=
 github.com/niemeyer/pretty v0.0.0-20200227124842-a10e7caefd8e/go.mod h1:zD1mROLANZcx1PVRCS0qkT7pwLkGfwJo4zjcN/Tysno=
+github.com/opentracing/opentracing-go v1.1.0/go.mod h1:UkNAQd3GIcIGf0SeVgPpRdFStlNbqXla1AfSYxPUl2o=
 github.com/pelletier/go-toml v1.4.0/go.mod h1:PN7xzY2wHTK0K9p34ErDQMlFxa51Fk0OUruD3k1mMwo=
 github.com/pkg/errors v0.8.0/go.mod h1:bwawxfHBFNV+L2hUp1rHADufV3IMtnDRdf1r5NINEl0=
 github.com/pkg/errors v0.8.1 h1:iURUrRGxPUNPdy5/HRSm+Yj6okJ6UtLINN0Q9M4+h3I=
@@ -103,6 +104,8 @@ github.com/xdg/scram v0.0.0-20180814205039-7eeb5667e42c h1:u40Z8hqBAAQyv+vATcGgV
 github.com/xdg/scram v0.0.0-20180814205039-7eeb5667e42c/go.mod h1:lB8K/P019DLNhemzwFU4jHLhdvlE6uDZjXFejJXr49I=
 github.com/xdg/stringprep v0.0.0-20180714160509-73f8eece6fdc h1:n+nNi93yXLkJvKwXNP9d55HC7lGK4H/SRcwB5IaUZLo=
 github.com/xdg/stringprep v0.0.0-20180714160509-73f8eece6fdc/go.mod h1:Jhud4/sHMO4oL310DaZAKk9ZaJ08SJfe+sJh0HrGL1Y=
+github.com/zevst/health-go-opentracing v0.0.0-20200621125511-223d6237acfe h1:Ioo+/WQLfeGexDz1z/Jn1OJI+NbKrPxMEIVv/CSrmdg=
+github.com/zevst/health-go-opentracing v0.0.0-20200621125511-223d6237acfe/go.mod h1:6op2mz9j+RY4KTc9FfPJbSDL+WonCAB0TTHcGY9krvA=
 go.mongodb.org/mongo-driver v1.3.4 h1:zs/dKNwX0gYUtzwrN9lLiR15hCO0nDwQj5xXx+vjCdE=
 go.mongodb.org/mongo-driver v1.3.4/go.mod h1:MSWZXKOynuguX+JSvwP8i+58jYCXxbia8HS3gZBapIE=
 golang.org/x/crypto v0.0.0-20180904163835-0709b304e793/go.mod h1:6SG95UA2DQfeDnfUPMdvaQW0Q7yPrPDi9nlGo2tz2b4=

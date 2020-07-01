@@ -1,6 +1,7 @@
 package health
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"github.com/christianhujer/assert"
@@ -35,6 +36,35 @@ func SampleCheck() ChecksProvider {
 	return &sampleCheck{}
 }
 
+type sampleContextCheck struct{}
+
+func (s *sampleContextCheck) HealthChecks(context.Context) map[string][]Checks {
+	return map[string][]Checks{
+		"sampleCheck": {
+			{
+				ComponentType: "sampleCheck",
+				Status:        Pass,
+			},
+		},
+	}
+}
+
+func SampleContextCheck() ProviderContext {
+	return new(sampleContextCheck)
+}
+
+type samplePlugin struct{}
+
+func (s *samplePlugin) Start(http.ResponseWriter, *http.Request) {
+}
+
+func (s *samplePlugin) End(http.ResponseWriter, *http.Request) {
+}
+
+func SamplePlugin() HandlerPlugin {
+	return new(samplePlugin)
+}
+
 func initHandler() {
 	if handler != nil {
 		return
@@ -45,6 +75,8 @@ func initHandler() {
 			ReleaseID: "1.0.0-SNAPSHOT",
 		},
 		SampleCheck(),
+		SampleContextCheck(),
+		SamplePlugin(),
 	)
 	handler = h.Handler
 }
